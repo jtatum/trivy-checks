@@ -5,7 +5,9 @@
   nodeType: worker
   audit: >-
     ps -eo args |
-    awk -v bin="$kubelet.bins" '{name=$1; sub(/^.*\//, "", name); if (name == bin) print}' |
+    awk -v bin="$kubelet.bins" 'BEGIN {n=split(bin, parts, " ")}
+    {name=$1; sub(/^.*\//, "", name); if (!n || name != parts[1]) next;
+    for (i=2; i<=n; i++) if ($i != parts[i]) next; print}' |
     grep ' --protect-kernel-defaults' |
     grep -o ' --protect-kernel-defaults=[^"]\S*' |
     awk -F "=" '{print $2}' |
